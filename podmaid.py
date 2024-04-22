@@ -1,22 +1,7 @@
-﻿from pprint import pprint as print
-import podman
-import pytermgui as ptg
-
-CONFIG = """
-config:
-    Window:
-        styles:
-            border: '140'
-            corner: '140'
-
-    Container:
-        styles:
-            border: '96'
-            corner: '96'
-"""
-
-with ptg.YamlLoader() as loader:
-    loader.load(CONFIG)
+﻿import podman
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.widgets import Footer, Header
 
 def safe_get(ls: list, idx: int, default: any) -> str:
     try:
@@ -37,30 +22,24 @@ def get_images() -> dict:
             print("Impossible de se connecter à l'API de Podman\n\
                   Essayez : podman system service -t 0 &")
 
-def handle_select(img_id):
-    print(f"Vous avez sélectionné l'image avec ID: {img_id}")
+class Podmaid(App):
+    BINDINGS = [
+        Binding(key="q", action="quit", description="Quit"),
+        Binding(key="j", action="down", description="Scroll down", show=False),
+        Binding(key="k", action="up", description="Scroll up", show=False),
+    ]
 
-def build_labels_list() -> list[list]:
-    list_labels = []
-    for img_id, img_data in get_images().items():
-        list_labels.append([f"[@black #auto]{img_data['short_id']} {img_data['tag']}",
-                            lambda img_id=img_id: handle_select(img_id)])
-    return list_labels
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Footer()
 
-def display_window() -> None:
-    with ptg.WindowManager() as manager:
-
-        window = (ptg.Window(*build_labels_list(),
-                             width=100,
-                             box="DOUBLE")
-                  .set_title("[210 bold]Images")
-                  .center())
-
-        manager.add(window)
+    def on_mount(self) -> None:
+        self.title = "Podmaid"
+        self.sub_title = "A podman cleaner in the terminal"
 
 def main():
-    display_window()
-
+    app = Podmaid()
+    app.run()
 
 if __name__ == "__main__":
     main()
