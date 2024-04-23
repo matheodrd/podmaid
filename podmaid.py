@@ -30,6 +30,9 @@ def build_list_view() -> ListView:
     return list_view
 
 class Podmaid(App):
+
+    CSS_PATH = "podmaid.tcss"
+
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
         Binding(key="j", action="down", description="Scroll down", show=False),
