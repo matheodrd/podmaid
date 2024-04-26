@@ -1,4 +1,6 @@
-﻿import podman
+﻿import os
+from time import sleep
+import podman
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.widgets import Footer, Header, ListView, ListItem, Label
@@ -49,6 +51,21 @@ class Podmaid(App):
         self.sub_title = "A podman cleaner in the terminal"
 
 def main():
+    # Start the podman REST API service
+    os.system("/bin/bash -c \"podman system service -t 0 &\"")
+
+    # Wait for the podman service to become available
+    retries = 20
+    wait_time = 0.5  # seconds
+    for _ in range(retries):
+        with podman.PodmanClient() as pdm:
+            if pdm.ping():
+                break
+        sleep(wait_time)
+    else:
+        print("Le service Podman REST API n'a pas démarré correctement.")
+        return
+
     app = Podmaid()
     app.run()
 
